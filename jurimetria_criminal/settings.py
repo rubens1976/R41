@@ -12,29 +12,21 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
-from dotenv import load_dotenv
+import environ
 
-# Load environment variables from .env file
-load_dotenv()
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# Defina BASE_DIR
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Inicialize as variáveis de ambiente
+env = environ.Env()
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'your-secret-key')  # Load from environment or use a default
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
-
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
-
+# Carregue as variáveis de ambiente do arquivo .env
+SECRET_KEY = env('SECRET_KEY', default='your-secret-key')  # Substitua pela chave real no .env
+DEBUG = env.bool('DEBUG', default=False)
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -42,8 +34,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
-    'processos',  # Nosso aplicativo para processos jurídicos
+    'rest_framework',  # Certifique-se de que django-rest-framework está instalado
+    'processos',       # App para processos jurídicos
+    'upload_app',      # App para upload
+    'api_integration',  # Adicione sua nova app aqui
 ]
 
 MIDDLEWARE = [
@@ -61,8 +55,8 @@ ROOT_URLCONF = 'jurimetria_criminal.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / "templates"],  # Adicionando a pasta templates personalizada
-        'APP_DIRS': True,
+        'DIRS': [BASE_DIR / 'templates'],  # Inclui a pasta templates personalizada
+        'APP_DIRS': True,  # Permite o uso de templates nos diretórios dos apps
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -76,10 +70,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'jurimetria_criminal.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -89,7 +81,6 @@ DATABASES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -105,30 +96,29 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
-
 LANGUAGE_CODE = 'pt-br'
-
 TIME_ZONE = 'America/Sao_Paulo'
-
 USE_I18N = True
-
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
-
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / "static"]
 
-# Media files
+# Adiciona a pasta 'static' à lista de diretórios de arquivos estáticos
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',  # Corrigido para usar Path corretamente
+]
+
+# Diretório onde os arquivos estáticos serão coletados em produção
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Media files (for uploads)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

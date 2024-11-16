@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista de Processos{% endblock %}
+
+{% block content %}
+    <h1>Lista de Processos</h1>
+    <ul>
+        {% for processo in processos %}
+            <li>{{ processo.numero_processo }} - {{ processo.autor }} vs {{ processo.reu }}</li>
+        {% empty %}
+            <li>Nenhum processo encontrado.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

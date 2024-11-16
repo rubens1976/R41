@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Resultado da Extração</title>
+</head>
+<body>
+    <h1>Resultado da Extração</h1>
+    <ul>
+        {% for info in informacoes %}
+            <li><strong>ID {{ info.ID }}:</strong> {{ info.conteudo }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

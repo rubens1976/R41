@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    {% load static %} <!-- Carregamento do módulo estático -->
+    <meta charset="UTF-8">
+    <title>Buscar Processos CNJ</title>
+    <link rel="stylesheet" href="{% static 'css/estilos.css' %}">
+    <style>
+        body {
+            background-color: #013220; /* Azul escuro da logo */
+            color: #FFFFFF; /* Cor de texto branca para contraste */
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            color: #FFFFFF; /* Branco */
+            text-align: center;
+            margin: 20px;
+        }
+        form {
+            max-width: 800px;
+            margin: 50px auto;
+            background-color: #ffffff; /* Fundo branco para contraste */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: calc(50% - 20px); /* Ajuste do tamanho mínimo dos elementos */
+        }
+        label {
+            color: #000000; /* Preto para os rótulos */
+            margin-bottom: 5px;
+        }
+        input[type="text"], select {
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #cccccc;
+            border-radius: 5px;
+        }
+        button[type="submit"] {
+            background-color: #013220; /* Azul escuro da logo */
+            color: #ffffff; /* Branco */
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+            text-align: center;
+        }
+        button[type="submit"]:hover {
+            background-color: #00CFFF; /* Azul claro para o efeito de hover */
+        }
+        
+        /* Ajustes da logo */
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .logo-container .logo {
+            width: 150px; /* Ajuste da largura */
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Cabeçalho com logo -->
+    <header>
+        <div class="logo-container">
+            <img src="{% static 'images/logo1.png' %}" alt="Logo Dr. Analytic" class="logo"> <!-- Logo -->
+        </div>
+    </header>
+
+    <h1>Buscar Processos por Tribunal e Classe TPU</h1>
+    <form method="POST" action="{% url 'buscar_processos_cnj' %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="tribunal">Tribunal:</label>
+            <select id="tribunal" name="tribunal" class="form-control">
+                <option value="TJAC">TJAC</option>
+                <option value="TJAL">TJAL</option>
+                <option value="TJAM">TJAM</option>
+                <option value="TJAP">TJAP</option>
+                <option value="TJBA">TJBA</option>
+                <option value="TJCE">TJCE</option>
+                <option value="TJDFT">TJDFT</option>
+                <option value="TJES">TJES</option>
+                <option value="TJGO">TJGO</option>
+                <option value="TJMA">TJMA</option>
+                <option value="TJMG">TJMG</option>
+                <option value="TJMS">TJMS</option>
+                <option value="TJMT">TJMT</option>
+                <option value="TJPA">TJPA</option>
+                <option value="TJPB">TJPB</option>
+                <option value="TJPE">TJPE</option>
+                <option value="TJPI">TJPI</option>
+                <option value="TJPR">TJPR</option>
+                <option value="TJRJ">TJRJ</option>
+                <option value="TJRN">TJRN</option>
+                <option value="TJRO">TJRO</option>
+                <option value="TJRR">TJRR</option>
+                <option value="TJRS">TJRS</option>
+                <option value="TJSC">TJSC</option>
+                <option value="TJSE">TJSE</option>
+                <option value="TJSP">TJSP</option>
+                <option value="TJTO">TJTO</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="codigos_assunto">Códigos de Classe TPU:</label>
+            <input type="text" name="codigos_assunto" placeholder="Ex: 14926, 12345">
+        </div>
+
+        <button type="submit">Buscar</button>
+    </form>
+</body>
+</html>

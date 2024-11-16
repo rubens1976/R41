@@ -1,0 +1,90 @@
+/* Estilo para o corpo da página */
+body {
+    background-color: #00CFFF; /* Cor azul claro */
+    color: #000000; /* Texto preto */
+    font-family: Arial, sans-serif;
+}
+
+/* Estilo para o título */
+h1 {
+    color: #000000; /* Preto */
+    text-align: center;
+    font-size: 3em;
+    margin-top: 20px;
+}
+
+/* Estilo dos botões */
+.btn {
+    background-color: #013220; /* Verde escuro */
+    border: 1px solid #013220; /* Borda do botão */
+    color: #ffffff; /* Cor do texto branco */
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.btn:hover {
+    background-color: #228B22; /* Verde escuro ao passar o mouse */
+    transform: scale(1.05); /* Aumento suave ao passar o mouse */
+}
+
+.btn:focus {
+    outline: none; /* Remove o contorno ao clicar */
+}
+
+/* Estilo para a logo */
+.logo-container {
+    display: flex;
+    justify-content: flex-start;
+    margin: 20px 0;
+    padding-left: 20px;
+}
+
+.logo-container .logo {
+    width: 150px; /* Ajusta a largura */
+    height: auto;
+}
+
+/* Ajuste na tabela */
+table {
+    width: 100%;
+    margin: 20px auto;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+    padding: 15px;
+    text-align: left;
+    border: 1px solid #CCCCCC;
+}
+
+th {
+    background-color: #f2f2f2;
+    color: #000000;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* Ajustes para o layout responsivo */
+@media (max-width: 768px) {
+    table, th, td {
+        display: block;
+        width: 100%;
+    }
+
+    th, td {
+        box-sizing: border-box;
+    }
+
+    tr {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 10px;
+    }
+}

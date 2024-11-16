@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    {% load static %} <!-- Carregar a tag estática -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados da Busca</title>
+    <link rel="stylesheet" href="{% static 'css/estilos.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #013220; /* Azul escuro */
+            color: #FFFFFF; /* Cor de texto branca para contraste */
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            color: #FFFFFF; /* Branco */
+            text-align: center; /* Centralizando o título */
+            font-weight: bold; /* Tornar o título em negrito */
+            margin-top: 20px; /* Ajuste de margem para alinhar no topo */
+        }
+        .container {
+            max-width: 90%; /* Ajuste para ocupar 90% da largura da tela */
+            padding: 20px;
+            margin: auto;
+        }
+        table {
+            width: 100%;
+            margin: 0 auto;
+            border-collapse: collapse;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff; /* Fundo branco para tabela */
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border: 1px solid #CCCCCC;
+            word-wrap: break-word; /* Ajuste para quebra de linha quando o conteúdo for muito grande */
+        }
+        th {
+            background-color: #f2f2f2; /* Cinza suave */
+            color: #000000; /* Preto */
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9; /* Listras suaves para linhas pares */
+        }
+        p {
+            text-align: center;
+            color: #A6193C; /* Vermelho escuro para erros */
+            font-size: 1.2em;
+        }
+        /* Ajustes para tornar a tabela responsiva */
+        @media (max-width: 768px) {
+            table, th, td {
+                display: block;
+                width: 100%;
+            }
+            th, td {
+                box-sizing: border-box;
+            }
+            tr {
+                display: flex;
+                flex-direction: column;
+                margin-bottom: 10px;
+            }
+        }
+        .btn-primary {
+            margin-top: 20px;
+            background-color: #013220; /* Verde petróleo */
+            border-color: #013220;
+            color: #ffffff; /* Cor do texto */
+            transition: background-color 0.3s ease;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .btn-primary:hover {
+            background-color: #228B22; /* Verde escuro ao passar o mouse */
+        }
+
+        /* Ajustes da logo */
+        .logo-container {
+            display: flex;
+            justify-content: flex-start;
+            margin: 20px 0;
+            padding-left: 20px;
+        }
+
+        .logo-container .logo {
+            width: 150px; /* Ajuste da largura */
+            height: auto;
+        }
+
+        /* Estilo para os botões de ação */
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .button-group form {
+            width: 23%; /* Ajustando a largura dos botões */
+        }
+    </style>
+</head>
+<body>
+    <!-- Cabeçalho com logo e título -->
+    <header>
+        <div class="logo-container">
+            <img src="{% static 'images/logo1.png' %}" alt="Logo Dr. Analytic" class="logo"> <!-- Logo -->
+        </div>
+    </header>
+
+    <h1>Resultados da Busca</h1> <!-- Título do cabeçalho centralizado e em negrito -->
+
+    {% if erro %}
+        <p>{{ erro }}</p>
+    {% else %}
+        <div class="container">
+            <!-- Botões de ação -->
+            <div class="button-group text-center">
+                <form action="{% url 'gerar_graficos' %}" method="GET">
+                    <button type="submit" class="btn btn-primary">Gerar Análises Gráficas</button>
+                </form>
+                <form action="{% url 'exportar_pdf' %}" method="GET">
+                    <button type="submit" class="btn btn-primary">Exportar para PDF</button>
+                </form>
+                <form action="{% url 'exportar_excel' %}" method="GET">
+                    <button type="submit" class="btn btn-primary">Exportar para Excel</button>
+                </form>
+                <form action="{% url 'encaminhar_email' %}" method="POST">
+                    <button type="submit" class="btn btn-primary">Encaminhar por E-mail</button>
+                </form>
+            </div>
+
+            <!-- Tabela de resultados -->
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Número do Processo</th>
+                        <th>Classe</th>
+                        <th>Sistema</th>
+                        <th>Formato</th>
+                        <th>Tribunal</th>
+                        <th>Data de Última Atualização</th>
+                        <th>Grau</th>
+                        <th>Nível de Sigilo</th>
+                        <th>Órgão Julgador</th>
+                        <th>Código Município IBGE</th>
+                        <th>Código Órgão Julgador</th>
+                        <th>Nome Órgão Julgador</th>
+                        <th>Assuntos</th>
+                        <th>Movimentações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for resultado in resultados %}
+                    <tr>
+                        <td>{{ resultado.numeroProcesso }}</td>
+                        <td>{{ resultado.classe }}</td>
+                        <td>{{ resultado.sistema }}</td>
+                        <td>{{ resultado.formato }}</td>
+                        <td>{{ resultado.tribunal }}</td>
+                        <td>{{ resultado.dataHoraUltimaAtualizacao }}</td>
+                        <td>{{ resultado.grau }}</td>
+                        <td>{{ resultado.nivelSigilo }}</td>
+                        <td>{{ resultado.orgaoJulgadorNome }}</td>
+                        <td>{{ resultado.codigoMunicipioIBGE }}</td>
+                        <td>{{ resultado.orgaoJulgadorCodigo }}</td>
+                        <td>{{ resultado.orgaoJulgadorNome }}</td>
+                        <td>{{ resultado.assuntos }}</td>
+                        <td>
+                            <ul>
+                                {% for movimento in resultado.movimentacoes %}
+                                    <li>{{ movimento.dataHora }} - {{ movimento.descricao }}</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
