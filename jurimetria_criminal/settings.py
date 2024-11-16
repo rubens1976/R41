@@ -19,7 +19,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Inicialize as variáveis de ambiente
 env = environ.Env()
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))  # Certifique-se que o arquivo .env existe
 
 # Carregue as variáveis de ambiente do arquivo .env
 SECRET_KEY = env('SECRET_KEY', default='your-secret-key')  # Substitua pela chave real no .env

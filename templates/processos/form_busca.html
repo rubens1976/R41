@@ -118,10 +118,13 @@
 
         <div class="form-group">
             <label for="codigos_assunto">Códigos de Classe TPU:</label>
-            <input type="text" name="codigos_assunto" placeholder="Ex: 14926, 12345">
+            <input type="text" name="codigos_assunto" placeholder="Ex: 14926, 12345" id="codigo_tpu">
         </div>
 
-        <button type="submit">Buscar</button>
+        <button type="submit" id="btn-buscar">Buscar</button>
     </form>
+
+    <!-- Adicionando o arquivo de script -->
+    <script src="{% static 'js/scripts.js' %}"></script>
 </body>
 </html>
