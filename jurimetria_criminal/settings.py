@@ -12,19 +12,17 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
-import environ
 
 # Defina BASE_DIR
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Inicialize as variáveis de ambiente
-env = environ.Env()
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))  # Certifique-se que o arquivo .env existe
 
 # Carregue as variáveis de ambiente do arquivo .env
-SECRET_KEY = env('SECRET_KEY', default='your-secret-key')  # Substitua pela chave real no .env
-DEBUG = env.bool('DEBUG', default=False)
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
+SECRET_KEY="django-insecure-3a^8*4+!6jh3z9&5^o)_s8$!9lz!@5bfs3jb2k4zxf$!4z&wv"
+DEBUG=True
+ALLOWED_HOSTS=[]
+API_KEY="cDZHYzlZa0JadVREZDJCendQbXY6SkJlTzNjLV9TRENyQk1RdnFKZGRQdw=="
+
 
 # Application definition
 INSTALLED_APPS = [
@@ -122,3 +120,11 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'seuemail@gmail.com'
+EMAIL_HOST_PASSWORD = 'suasenha'
+

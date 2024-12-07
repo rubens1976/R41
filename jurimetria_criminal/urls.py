@@ -12,6 +12,8 @@ urlpatterns = [
     path('api/', include('api_integration.urls')),  # Inclui URLs da nova app 'api_integration'
 ]
 
+
 # Configuração para servir arquivos de mídia em desenvolvimento
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

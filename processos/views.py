@@ -1,25 +1,35 @@
+import environ
+import json
+import requests
+import pandas as pd
 from django.shortcuts import render, redirect
 from .models import Processo
 import matplotlib.pyplot as plt
-import io
+import io 
 import base64
-import json
-import requests
 import logging
-import pandas as pd
 from datetime import datetime
 from django.http import HttpResponse
 from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from django.core.mail import send_mail
+from django.shortcuts import render
+from django.http import HttpResponse
+from reportlab.pdfgen import canvas
+import pandas as pd
+from django.http import HttpResponse
+from django.core.mail import send_mail
+from django.http import HttpResponse
 
+# Configuração do ambiente
+env = environ.Env()
+environ.Env.read_env()
+API_KEY = env('API_KEY')  # Chave da API do arquivo .env
+api_key = "APIKey cDZHYzlZa0JadVREZDJCendQbXY6SkJlTzNjLV9TRENyQk1RdnFKZGRQdw=="  # Chave pública
 
 # Configuração do Logger
 logger = logging.getLogger(__name__)
-
-# Chave da API
-API_KEY = "APIKey cDZHYzlZa0JadVREZDJCendQbXY6SkJlTzNjLV9TRENyQk1RdnFKZGRQdw=="
 
 # URLs das APIs dos tribunais
 API_URLS = {
@@ -165,69 +175,143 @@ def listar_processos(request):
     processos = Processo.objects.all()
     return render(request, 'processos/process_list.html', {'processos': processos})
 
-# Função para buscar processos, Lógica para buscar processos
+# Função para buscar processos pela API do CNJ
 def buscar_processos_cnj(request):
-    context = {
-        'dados': 'Aqui vem os dados dos processos'
-    }
-    return render(request, 'processos/form_busca.html', context)  # Substitua o nome do template conforme necessário
+    if request.method == "POST":
+        tribunal = request.POST.get("tribunal")
+        codigos_assunto = request.POST.get("codigos_assunto").split(",")  # Recebe os códigos de assunto
+        
+        # Verificando se o tribunal existe no dicionário de URLs
+        url = API_URLS.get(tribunal)
+        if not url:
+            return render(request, 'processos/form_busca.html', {'erro': "Tribunal não encontrado"})
+        
+        # Construindo a consulta com uma cláusula 'bool' e 'should' para múltiplos valores
+        payload = json.dumps({
+            "size": 10000,  # Definindo o tamanho máximo de registros para a consulta
+            "query": {
+                "bool": {
+                    "should": [
+                        {"match": {"classe.codigo": codigo.strip()}} for codigo in codigos_assunto
+                    ],
+                    "minimum_should_match": 1  # Pelo menos um código deve coincidir
+                }
+            },
+            "sort": [{"dataAjuizamento": {"order": "desc"}}]  # Ordenando por data de ajuizamento (mais recente primeiro)
+        })
+        
+        headers = {
+            'Authorization': API_KEY,
+            'Content-Type': 'application/json'
+        }
 
-# Lógica para o formulário de busca
+        # Realiza a solicitação para a API
+        response = requests.post(url, headers=headers, data=payload)
+        
+        if response.status_code == 200:
+            dados_dict = response.json()  # Resposta da API em formato JSON
+            processos = []
+            
+            # Extraindo os dados dos processos
+            for processo in dados_dict['hits']['hits']:
+                numero_processo = processo['_source'].get('numeroProcesso', None)
+                grau = processo['_source'].get('grau', None)
+                classe = processo['_source'].get('classe', {}).get('nome', None)
+                assuntos = processo['_source'].get('assuntos', [])
+                data_ajuizamento = processo['_source'].get('dataAjuizamento', None)
+                ultima_atualizacao = processo['_source'].get('dataHoraUltimaAtualizacao', None)
+                formato = processo['_source'].get('formato', {}).get('nome', None)
+                codigo = processo['_source'].get('orgaoJulgador', {}).get('codigo', None)
+                orgao_julgador = processo['_source'].get('orgaoJulgador', {}).get('nome', None)
+                municipio = processo['_source'].get('orgaoJulgador', {}).get('codigoMunicipioIBGE', None)
+                sort = processo.get('sort', [None])[0]
+
+                try:
+                    movimentos = processo['_source'].get('movimentos', [])
+                except KeyError:
+                    movimentos = []
+
+                processos.append([numero_processo, classe, data_ajuizamento, ultima_atualizacao, formato, \
+                                  codigo, orgao_julgador, municipio, grau, assuntos, movimentos, sort])
+            
+            # Convertendo a lista de processos em um DataFrame
+            df = pd.DataFrame(processos, columns=['numero_processo', 'classe', 'data_ajuizamento', 'ultima_atualizacao', \
+                                                  'formato', 'codigo', 'orgao_julgador', 'municipio', 'grau', 'assuntos', \
+                                                  'movimentos', 'sort'])
+
+            # Exibindo uma amostra de 5 registros
+            return render(request, 'processos/resultados_busca.html', {'df': df.head()})
+        else:
+            return render(request, 'processos/form_busca.html', {'erro': f"Erro ao buscar dados na API: {response.status_code}"})
+    
+    return render(request, 'processos/form_busca.html')  # Para o caso de requisição GET
+
+def home(request):
+    return redirect('processos:form_busca')
+
 def form_busca(request):
-    return render(request, 'processos/form_busca.html')
+    # Renderize a página HTML do formulário de busca
+    return render(request, 'form_busca.html')
 
-# Lógica para verificação de processos
 def verificacao_processos(request):
-    context = {
-        'dados': 'Aqui estão os dados dos processos'  # Altere conforme a lógica
-    }
-    return render(request, 'processos/verificacao_processos.html', context)  # Substitua o template conforme necessário
+    return render(request, 'verificacao_processos.html')
 
-# Criação do arquivo PDF em memória
 def exportar_pdf(request):
-    buffer = BytesIO()
-    p = canvas.Canvas(buffer, pagesize=letter)
-    p.drawString(100, 750, "Aqui estão os dados dos processos")
+    # Cria um buffer para gerar o PDF
+    buffer = io.BytesIO()
+
+    # Cria um objeto canvas para o PDF
+    p = canvas.Canvas(buffer)
+
+    # Adiciona conteúdo ao PDF
+    p.drawString(100, 750, "Este é um exemplo de PDF gerado pelo Django.")
+    p.drawString(100, 730, "Modifique este texto para o conteúdo que deseja incluir no PDF.")
+
+    # Finaliza o PDF
     p.showPage()
     p.save()
 
-    # Gerar o PDF e retornar como resposta HTTP
+    # Retorna a resposta do PDF
     buffer.seek(0)
     return HttpResponse(buffer, content_type='application/pdf')
 
-# Sua lógica para exportação de dados para Excel aqui
 def exportar_excel(request):
-    dados = {'coluna1': [1, 2, 3], 'coluna2': [4, 5, 6]}  # Exemplo de dados
+    # Exemplo de dados a serem exportados
+    dados = {
+        'Coluna 1': ['Valor 1', 'Valor 2', 'Valor 3'],
+        'Coluna 2': ['Valor A', 'Valor B', 'Valor C'],
+    }
+
+    # Criar um DataFrame com pandas
     df = pd.DataFrame(dados)
+
+    # Criar uma resposta HTTP com o tipo de conteúdo para Excel
     response = HttpResponse(content_type='application/vnd.ms-excel')
     response['Content-Disposition'] = 'attachment; filename="dados.xlsx"'
-    df.to_excel(response, index=False)
+
+    # Salvar o DataFrame como Excel no objeto de resposta
+    with pd.ExcelWriter(response, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Dados')
+
     return response
 
-# Lógica para enviar o e-mail
-def encaminhar_email(request):
-    try:
-        send_mail(
-            'Assunto Relatório de Análise de Dados de Jurimetria',
-            'Corpo do e-mail',
-            'from@example.com',
-            ['rubensmelo1976@gmail.com'],
-            fail_silently=False,
-        )
-        return HttpResponse('E-mail enviado com sucesso!')
-    except Exception as e:
-        return HttpResponse(f'Erro ao enviar e-mail: {str(e)}')
 
-# Lógica para envio o e-mail
 def encaminhar_email(request):
+    # Configurações do e-mail
+    assunto = 'Exemplo de E-mail'
+    mensagem = 'Este é um exemplo de e-mail enviado pelo Django.'
+    remetente = 'seuemail@dominio.com'
+    destinatarios = ['destinatario@dominio.com']
+
     try:
+        # Enviar o e-mail
         send_mail(
-            'Assunto do e-mail',
-            'Corpo do e-mail',
-            'from@example.com',
-            ['to@example.com'],
-            fail_silently=False,
+            assunto,
+            mensagem,
+            remetente,
+            destinatarios,
+            fail_silently=False,  # Levantar erros em caso de falha
         )
-        return HttpResponse('E-mail enviado com sucesso!')
+        return HttpResponse('E-mail enviado com sucesso.')
     except Exception as e:
-        return HttpResponse(f'Erro ao enviar e-mail: {str(e)}')
+        return HttpResponse(f'Erro ao enviar o e-mail: {str(e)}')
